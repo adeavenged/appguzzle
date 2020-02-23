@@ -1,0 +1,65 @@
+<?php
+	require 'function_update.php';
+	$totalpersonel = total_personel_cat();
+	
+	$per_page = 1000;
+	$jumlahHalaman = ceil($totalpersonel/$per_page);
+	
+	$page = isset($_GET['start']) ? (int)$_GET["start"] : 0;
+	$mulai = ($page>1) ? ($page - 1) * $per_page : 0;
+
+	if (isset($_GET['start'])) {	
+		$data_all = data_all_personel($mulai);
+	}
+
+	// var_dump($data_all);die;
+	echo"<table border='1' cellpadding='3' cellspacing='0' width='100%'>
+		<tr>
+			<th>#</th>
+			<th>Data Catpers</th>
+			<th>Data SIP</th>
+		</tr>";
+	$personel_arr = [];
+	foreach ($data_all as $pers) {
+		$idpersonel = $pers['idPersonel'];
+		$personel_cr = data_personel_sip($pers['nrp'])['data'];
+		$jabatan_request = jabatan_req($personel_cr['jabatan']);
+
+		if(count($personel_cr) > 0) {
+			$img_nrp = ($pers['nrp'] == $personel_cr['nrp']) ? 'check.png' : 'warning.png';
+			$img_nama = ($pers['nama'] == $personel_cr['nama']) ? 'check.png' : 'warning.png';
+			$img_pangkat = ($pers['nama_pangkat'] == $personel_cr['pangkat']) ? 'check.png' : 'warning.png';
+			$img_jab = (trim($pers['nama_jabatan']) == trim($jabatan_request['jabatan'])) ? 'check.png' : 'warning.png';
+			$img_tmp = (trim($pers['nama_tempat']) == trim($jabatan_request['satker'])) ? 'check.png' : 'warning.png';
+
+		} else {
+			$img_nrp = 'cross_circle.png';
+			$img_nama = 'cross_circle.png';
+			$img_pangkat = 'cross_circle.png';
+			$img_jab = 'cross_circle.png';
+			$img_tmp = 'cross_circle.png';
+		}
+
+		echo"<tr>
+			<td>".++$mulai."</td>
+			<td>
+				NRP: ".$pers['nrp']." <img src='images/".$img_nrp."'> ".$idpersonel."<br>
+				NAMA: ".$pers['nama']." <img src='images/".$img_nama."'><br>
+				Pangkat: ".$pers['nama_pangkat']." <img src='images/".$img_pangkat."'><br>
+				Jabatan: ".$pers['nama_jabatan']." <img src='images/".$img_jab."'> ".$idJab."<br>
+				Tempat Kerja: ".$pers['nama_tempat']." <img src='images/".$img_tmp."'><br>
+			</td>
+			<td>
+				NRP: ".$personel_cr['nrp']."<br>
+				NAMA: ".$personel_cr['nama']."<br>
+				Pangkat: ".$personel_cr['pangkat']."<br>
+				Jabatan: ".$jabatan_request['jabatan']."<br>
+				Tempat Kerja: ".$jabatan_request['satker']."<br>
+			</td>
+		</tr>";
+		
+	}
+	echo"</table>";
+
+	//var_dump($personel_arr);
+?>
